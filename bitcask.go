@@ -2,6 +2,7 @@ package bitcask
 
 import (
 	"encoding/binary"
+	"hash/crc32"
 	"io"
 	"io/ioutil"
 	"os"
@@ -188,7 +189,20 @@ func (bc *Bitcask) marge() {
 			} else {
 				bc.odfs[int(v.dfNo)].ReadAt(tmp, int64(v.valuePos))
 			}
-			println(k, string(tmp))
+			de := new(dataElem)
+			de.tstamp = v.tstamp
+			de.keySz = uint32(len(k))
+			de.valueSz = v.valueSz
+			de.key = []byte(k)
+			de.value = tmp
+			crc := crc32.NewIEEE()
+			binary.Write(crc, binary.LittleEndian, de.tstamp)
+			binary.Write(crc, binary.LittleEndian, de.keySz)
+			binary.Write(crc, binary.LittleEndian, de.valueSz)
+			crc.Write([]byte(k))
+			crc.Write(tmp)
+			de.crc = crc.Sum32()
+			//TODO
 		}
 	}
 }
