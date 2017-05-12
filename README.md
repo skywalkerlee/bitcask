@@ -25,3 +25,6 @@ bar2
 bar3
 
 ```
+## TODO
+* merge operation
+* checksum compare
